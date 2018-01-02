@@ -1,0 +1,1 @@
+Visually Complete is calculated by reporting the time until roughly 80% of elements in the viewport have loaded. It references img, iframe, css, script, and subdocument elements in the Resource Timing API to determine the time from navigation to the page appearing loaded to an end user.
