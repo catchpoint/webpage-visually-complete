@@ -73,6 +73,7 @@ windowItem.CPVisuallyComplete = (function () {
             for (let i = 0; i < requests.length; i++) {
                 if (requests[i].name === event.target.currentSrc) {
                     request = requests[i];
+                    break;
                 }
             }
 
@@ -82,21 +83,24 @@ windowItem.CPVisuallyComplete = (function () {
                     Math.round((request as PerformanceResourceTiming).responseEnd)
                 );
             }
+
+            event.currentTarget.removeEventListener("load", this.imageListener);
         };
 
-        private videoListener = () => {
+        private videoListener = (event) => {
             this.maxResourceTiming = Math.max(
                 this.maxResourceTiming,
                 Math.round(this.getPerformanceTime())
             );
+
+            event.currentTarget.removeEventListener("canplay", this.imageListener);
         };
 
         private addListenersForDynamicContent = (element: HTMLDocument) => {
             const images = element.querySelectorAll("img");
             for (let i = 0; i < images.length; i += 1) {
                 const image = images[i];
-                const isVisible = this.isVisible(image);
-                if (isVisible) {
+                if (this.isVisible(image)) {
                     image.addEventListener("load", this.imageListener);
                 }
             }
@@ -104,8 +108,7 @@ windowItem.CPVisuallyComplete = (function () {
             const videos = element.querySelectorAll("video");
             for (let i = 0; i < videos.length; i += 1) {
                 const video = videos[i];
-                const isVisible = this.isVisible(video);
-                if (isVisible) {
+                if (this.isVisible(video)) {
                     video.addEventListener("canplay", this.videoListener);
                 }
             }
@@ -193,6 +196,7 @@ windowItem.CPVisuallyComplete = (function () {
             const elements = this.targetWindow.document.querySelectorAll(
                 '[style*="background"]'
             );
+
             for (let i = 0; i < elements.length; i++) {
                 if (this.isVisible(elements[i])) {
                     const styles = this.targetWindow.getComputedStyle(elements[i]);
@@ -213,6 +217,7 @@ windowItem.CPVisuallyComplete = (function () {
                 for (let i = 0; i < requests.length; i++) {
                     if (requests[i].name === new URL(url, this.targetWindow.location.href).href) {
                         request = requests[i];
+                        break;
                     }
                 }
 
@@ -282,7 +287,7 @@ windowItem.CPVisuallyComplete = (function () {
                     const addedNode = mutation.addedNodes[0] as any;
 
                     if (this.isVisible(addedNode)) {
-                        console.log(addedNode.nodeName);
+                        // console.log(addedNode.nodeName);
 
                         if (addedNode.nodeName.toLowerCase() === "img") {
                             addedNode.addEventListener("load", this.imageListener);
@@ -296,7 +301,7 @@ windowItem.CPVisuallyComplete = (function () {
                         if (this.softNav) {
                             this.resetValueOnSoftNav();
                         }
-                        console.log(perfTime);
+                        // console.log(perfTime);
 
                         const requests = this.targetWindow.performance.getEntriesByType(
                             "resource"
@@ -306,6 +311,7 @@ windowItem.CPVisuallyComplete = (function () {
                         for (let i = 0; i < requests.length; i++) {
                             if ((requests[i] as PerformanceResourceTiming).initiatorType === "xmlhttprequest") {
                                 lastXHR = requests[i] as PerformanceResourceTiming;
+                                break;
                             }
                         }
 
@@ -322,19 +328,11 @@ windowItem.CPVisuallyComplete = (function () {
                         mutation.target.nodeName.toLowerCase() === "img" &&
                         mutation.attributeName === "src"
                     ) {
-                        const requests = this.targetWindow.performance.getEntriesByType(
-                            "resource"
-                        );
-
-                        let request = undefined;
-                        for (let i = 0; i < requests.length; i++) {
-                            if (requests[i].name === (mutation.target as HTMLImageElement).currentSrc) {
-                                request = requests[i];
-                            }
-                        }
-
-                        if (request) {
-                            this.mutationObserverVal = Math.round(request.responseEnd);
+                        if (this.isVisible(mutation.target)) {
+                            mutation.target.addEventListener(
+                                "load",
+                                this.imageListener
+                            );
                         }
                     }
                 }
@@ -408,7 +406,7 @@ windowItem.CPVisuallyComplete = (function () {
         };
 
         private getMaxResourceTime() {
-            let maxTime: number = 0;
+            let maxTime = 0;
             const initiatorTypes: string[] = [
                 "img",
                 "iframe",

@@ -105,7 +105,7 @@ function measurePerformance() {
   let script = fs.readFileSync(path.join(__dirname, "visComplete.js"));
   await page.evaluateOnNewDocument(new Function(script));
   await page.evaluateOnNewDocument(measureVisuallyComplete);
-  // await page.evaluateOnNewDocument(measurePerformance);
+  await page.evaluateOnNewDocument(measurePerformance);
 
   // await page.goto("https://angular2-hn.firebaseapp.com/news/1");
   // await page.goto(
