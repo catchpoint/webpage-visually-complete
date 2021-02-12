@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "dist",
+    "sourceMap": true,
+    "allowJs": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "files": [
+    "src/index.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/index.js"
+  ]
+}
